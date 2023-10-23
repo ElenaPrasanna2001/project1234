@@ -2,10 +2,10 @@ import requests
 import json
 import pyttsx3
 
-def speak(str):
+def speak(text):
     engine = pyttsx3.init()
-    print(str)
-    engine.say(str)
+    print(text)
+    engine.say(text)
     engine.runAndWait()
 
 if __name__ == '__main__':
@@ -13,26 +13,23 @@ if __name__ == '__main__':
     speak("How Many News Do You Want to Hear?")
     a = int(input("How Many Latest News do you want to hear?: "))
 
-    url1 = 'https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=YOUR_API_KEY'
+    # Replace 'YOUR_API_KEY' with your actual News API key
+    api_key = 'YOUR_API_KEY'
+    url = f'https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey={api_key}'
 
-    news1= requests.get(url1).text
-    news_json = json.loads(news1)
-    art = news_json['articles']
+    response = requests.get(url)
 
-    for index, article in enumerate(art):
-        if index == a: 
-            break
-        speak(f'''News Number - {index+1}.. 
-        Title - {article['title']}
-        Description - {article['description']}
-        Content - {article['content']}
-        ''')
+    if response.status_code == 200:
+        news_data = json.loads(response.text)
+        articles = news_data['articles']
 
-    speak("Thanks For Listening. Come Back Tomorrow For More News...")
+        for index, article in enumerate(articles[:a]):  # Loop through the first 'a' articles
+            speak(f'''News Number - {index+1}.. 
+            Title - {article['title']}
+            Description - {article['description']}
+            Content - {article['content']}
+            ''')
 
-
-
-
-
-
-
+        speak("Thanks For Listening. Come Back Tomorrow For More News...")
+    else:
+        speak("Unable to fetch news. Please check your API key or network connection.")
